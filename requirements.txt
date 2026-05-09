@@ -1,0 +1,32 @@
+# ─── Core ML ───────────────────────────────────────────────────────────────
+pandas>=2.0
+numpy>=1.24
+xgboost>=2.0
+lightgbm>=4.0
+scikit-learn>=1.3
+optuna>=3.4
+shap>=0.44
+
+# ─── Data I/O ───────────────────────────────────────────────────────────────
+openpyxl>=3.1           # xlsx support
+
+# ─── Visualisation ──────────────────────────────────────────────────────────
+matplotlib>=3.7
+seaborn>=0.13
+plotly>=5.18
+
+# ─── Streamlit UI ───────────────────────────────────────────────────────────
+streamlit>=1.35
+
+# ─── REST API ───────────────────────────────────────────────────────────────
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9   # file uploads
+pydantic>=2.0
+
+# ─── AI Features (Gemini — optional) ────────────────────────────────────────
+google-generativeai>=0.5 
+
+# ─── Development / Testing ──────────────────────────────────────────────────
+# pytest>=7.0
+# httpx>=0.27              # async test client for FastAPI
