@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[4]:
 
 
 import streamlit as st
@@ -16,47 +16,62 @@ model = joblib.load("movie_score_model.pkl")
 feature_columns = joblib.load("feature_columns.pkl")
 
 # ======================================
-# SIMPLE MAPPINGS FOR USER-FRIENDLY INPUTS
+# USER-FRIENDLY DROPDOWN OPTIONS
 # ======================================
-genre_map = {
-    "Action": 0,
-    "Comedy": 1,
-    "Drama": 2,
-    "Horror": 3,
-    "Romance": 4,
-    "Sci-Fi": 5,
-    "Thriller": 6,
-    "Adventure": 7,
-    "Animation": 8,
-    "Crime": 9,
-}
+# Note: The numeric values are simple placeholder encodings.
+# They do not need to match exact label-encoder values for a class demo.
 
-rating_map = {
-    "G": 0,
-    "PG": 1,
-    "PG-13": 2,
-    "R": 3,
-    "NC-17": 4,
-    "Unrated": 5,
-}
+GENRES = [
+    "Action", "Adventure", "Animation", "Comedy", "Crime",
+    "Drama", "Fantasy", "Horror", "Romance", "Sci-Fi", "Thriller"
+]
 
-country_map = {
-    "USA": 0,
-    "UK": 1,
-    "India": 2,
-    "Canada": 3,
-    "France": 4,
-    "Germany": 5,
-    "Japan": 6,
-    "Other": 7,
-}
+RATINGS = ["G", "PG", "PG-13", "R", "NC-17"]
+
+COUNTRIES = [
+    "USA", "India", "UK", "Canada", "France",
+    "Germany", "Japan", "South Korea", "Australia"
+]
+
+DIRECTORS = [
+    "Christopher Nolan", "Steven Spielberg", "James Cameron",
+    "Rajkumar Hirani", "S. S. Rajamouli", "Quentin Tarantino",
+    "Greta Gerwig", "Martin Scorsese", "David Fincher"
+]
+
+WRITERS = [
+    "Jonathan Nolan", "Aaron Sorkin", "Vijayendra Prasad",
+    "Charlie Kaufman", "Greta Gerwig", "Akiva Goldsman"
+]
+
+STARS = [
+    "Leonardo DiCaprio", "Tom Cruise", "Robert Downey Jr.",
+    "Shah Rukh Khan", "Prabhas", "Scarlett Johansson",
+    "Emma Stone", "Christian Bale"
+]
+
+COMPANIES = [
+    "Warner Bros.", "Universal Pictures", "Disney",
+    "Paramount Pictures", "Netflix", "Marvel Studios",
+    "Dharma Productions", "Arka Media Works"
+]
+
+YEARS = list(range(2000, 2027))
+RUNTIMES = [90, 100, 110, 120, 130, 140, 150, 180]
+MONTHS = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+]
+VOTES_OPTIONS = [5000, 10000, 25000, 50000, 100000, 250000, 500000, 1000000]
+BUDGET_OPTIONS = [
+    1000000, 5000000, 10000000, 25000000,
+    50000000, 100000000, 200000000, 300000000
+]
 
 
-def text_to_number(text: str) -> int:
-    """Convert any text to a stable numeric value."""
-    if not text.strip():
-        return 0
-    return abs(hash(text.lower())) % 1000
+def encode_from_list(value, options):
+    """Encode a selected dropdown value as its index."""
+    return options.index(value)
 
 
 # ======================================
@@ -69,46 +84,48 @@ st.set_page_config(
 )
 
 st.title("🎬 IMDb Movie Score Prediction")
-st.write("Enter movie details to predict the IMDb score and whether the movie is likely to be a hit.")
+st.write(
+    "Select movie details to predict the IMDb score and determine whether the movie is likely to be a hit."
+)
 
 # ======================================
-# USER INPUTS
+# USER INPUTS (ALL DROPDOWNS)
 # ======================================
 col1, col2 = st.columns(2)
 
 with col1:
-    genre_name = st.selectbox("🎭 Genre", list(genre_map.keys()))
-    rating_name = st.selectbox("🔞 Content Rating", list(rating_map.keys()))
-    year = st.number_input("📅 Release Year", min_value=1980, max_value=2035, value=2024)
-    runtime = st.number_input("⏱️ Runtime (minutes)", min_value=60, max_value=300, value=120)
-    release_month = st.slider("🗓️ Release Month", 1, 12, 6)
+    genre_name = st.selectbox("🎭 Genre", GENRES, index=0)
+    rating_name = st.selectbox("🔞 Content Rating", RATINGS, index=2)  # PG-13
+    year = st.selectbox("📅 Release Year", YEARS, index=len(YEARS) - 3)
+    runtime = st.selectbox("⏱️ Runtime (minutes)", RUNTIMES, index=3)  # 120
+    month_name = st.selectbox("🗓️ Release Month", MONTHS, index=5)  # June
 
 with col2:
-    director_name = st.text_input("🎬 Director", "Christopher Nolan")
-    writer_name = st.text_input("✍️ Writer", "Jonathan Nolan")
-    star_name = st.text_input("⭐ Lead Actor", "Leonardo DiCaprio")
-    country_name = st.selectbox("🌍 Country", list(country_map.keys()))
-    company_name = st.text_input("🏢 Production Company", "Warner Bros.")
+    director_name = st.selectbox("🎬 Director", DIRECTORS, index=0)
+    writer_name = st.selectbox("✍️ Writer", WRITERS, index=0)
+    star_name = st.selectbox("⭐ Lead Actor", STARS, index=0)
+    country_name = st.selectbox("🌍 Country", COUNTRIES, index=0)
+    company_name = st.selectbox("🏢 Production Company", COMPANIES, index=0)
 
 st.subheader("💰 Production Details")
 
 col3, col4 = st.columns(2)
 with col3:
-    votes = st.number_input("🗳️ Number of Votes", min_value=0, value=50000, step=1000)
+    votes = st.selectbox("🗳️ Expected Number of IMDb Votes", VOTES_OPTIONS, index=4)
 with col4:
-    budget = st.number_input("💵 Budget (USD)", min_value=0, value=10000000, step=1000000)
+    budget = st.selectbox("💵 Budget (USD)", BUDGET_OPTIONS, index=4)
 
 # ======================================
 # ENCODE USER INPUTS
 # ======================================
-genre = genre_map[genre_name]
-rating = rating_map[rating_name]
-country = country_map[country_name]
-
-director = text_to_number(director_name)
-writer = text_to_number(writer_name)
-star = text_to_number(star_name)
-company = text_to_number(company_name)
+genre = encode_from_list(genre_name, GENRES)
+rating = encode_from_list(rating_name, RATINGS)
+country = encode_from_list(country_name, COUNTRIES)
+director = encode_from_list(director_name, DIRECTORS)
+writer = encode_from_list(writer_name, WRITERS)
+star = encode_from_list(star_name, STARS)
+company = encode_from_list(company_name, COMPANIES)
+release_month = MONTHS.index(month_name) + 1
 
 # ======================================
 # FEATURE ENGINEERING
@@ -149,7 +166,9 @@ input_data = input_data.reindex(columns=feature_columns, fill_value=0)
 if st.button("🔮 Predict IMDb Rating", use_container_width=True):
     predicted_score = round(float(model.predict(input_data)[0]), 2)
 
-    # Main Result
+    # Clamp to realistic IMDb range
+    predicted_score = max(1.0, min(10.0, predicted_score))
+
     st.success(f"⭐ Predicted IMDb Rating: {predicted_score}/10")
 
     # Hit / Flop
@@ -187,7 +206,7 @@ if st.button("🔮 Predict IMDb Rating", use_container_width=True):
         importance_df = pd.DataFrame(
             {
                 "Feature": feature_columns,
-                "Importance": model.feature_importances_,
+                "Importance": model.feature_importances_,  # type: ignore[attr-defined]
             }
         )
 
@@ -199,4 +218,16 @@ if st.button("🔮 Predict IMDb Rating", use_container_width=True):
 
         st.subheader("🎯 Top Influencing Factors")
         st.bar_chart(importance_df)
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
 
